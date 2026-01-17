@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>普凌恋爱合约</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background-color: #f7f8fa;
+            color: #333;
+            line-height: 1.5;
+            padding-bottom: 50px;
+        }
+
+        /* 顶部导航 */
+        .navbar {
+            background: #fff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar span { font-weight: 600; font-size: 17px; color: #000; }
+
+        .container { padding: 16px; max-width: 500px; margin: 0 auto; }
+
+        /* 卡片容器 */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        /* 标题样式：仿截图 */
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 16px;
+            background: #d45d79; /* 普凌红 */
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        /* 必填星号 */
+        .required::after {
+            content: '*'; color: #ff4d4f; margin-left: 4px;
+        }
+
+        /* 输入框样式：仿截图 */
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ebedf0;
+            border-radius: 6px;
+            font-size: 15px;
+            background: #fff;
+            color: #333;
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+        .form-control:focus { border-color: #d45d79; }
+        .form-control::placeholder { color: #ccc; }
+
+        /* 姓名并排 */
+        .name-row { display: flex; gap: 12px; }
+        .name-row .form-control { text-align: center; }
+
+        /* 上传框 */
+        .upload-row { display: flex; justify-content: space-between; gap: 12px; }
+        .upload-box {
+            flex: 1;
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            color: #999;
+            font-size: 12px;
+            position: relative;
+        }
+        .upload-input { position: absolute; width: 100%; height: 100%; opacity: 0; top: 0; left: 0; }
+        .upload-icon { font-size: 24px; color: #d9d9d9; margin-bottom: 4px; font-weight: 300;}
+
+        /* 权益选择卡片 */
+        .reward-grid { display: flex; gap: 10px; margin-bottom: 15px;}
+        .reward-item {
+            flex: 1;
+            border: 1px solid #eee;
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 12px 5px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .reward-item.active {
+            background: #fff1f4;
+            border-color: #d45d79;
+            color: #d45d79;
+        }
+        .reward-item.active::after {
+            content: '✔'; position: absolute; bottom: 0; right: 0;
+            background: #d45d79; color: #fff; font-size: 10px; padding: 1px 5px;
+            border-top-left-radius: 6px;
+        }
+        .r-icon { display: block; font-size: 22px; margin-bottom: 4px; }
+        .r-title { display: block; font-size: 13px; font-weight: bold; }
+        .r-desc { display: block; font-size: 10px; opacity: 0.7; transform: scale(0.9); }
+
+        /* 动态输入区 */
+        .dynamic-area { display: none; background: #fafafa; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #f0f0f0; }
+        .dynamic-area.show { display: block; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 提交按钮 */
+        .submit-btn {
+            width: 100%; padding: 14px;
+            background: linear-gradient(90deg, #ff758c 0%, #ff7eb3 100%);
+            background: #d45d79;
+            color: white; border: none; border-radius: 25px;
+            font-size: 16px; font-weight: 600;
+            box-shadow: 0 4px 10px rgba(212, 93, 121, 0.3);
+            margin-top: 10px;
+        }
+        .submit-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+        /* 成功页 */
+        #step-2 { display: none; text-align: center; padding-top: 30px; }
+        .success-bg {
+            width: 100%;
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .blessing-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d45d79;
+            margin: 20px 0;
+            line-height: 1.4;
+            font-family: "Songti SC", serif; /* 用宋体更有仪式感 */
+        }
+        .status-badge {
+            display: inline-block;
+            background: #e6f7ed;
+            color: #28a745;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .detail-row {
+            display: flex; justify-content: space-between;
+            font-size: 14px; color: #666; margin-bottom: 12px;
+            border-bottom: 1px dashed #eee; padding-bottom: 12px;
+        }
+
+        /* Loading */
+        .loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9); z-index: 999;
+            display: none; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .spinner {
+            width: 30px; height: 30px; border: 3px solid #eee;
+            border-top-color: #d45d79; border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin-bottom: 10px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <span>普凌恋爱合约</span>
+    </div>
+
+    <div class="container">
+        
+        <!-- 表单页 -->
+        <div id="step-1">
+            <p style="text-align:center; font-size:12px; color:#999; margin-bottom:15px;">
+                合约编号: PL-2026-LOVE · 官方认证通道
+            </p>
+
+            <!-- 1. 身份认证 -->
+            <div class="card">
+                <div class="section-title">双方身份认证</div>
+                
+                <div class="form-group">
+                    <label class="required">双方真实姓名</label>
+                    <div class="name-row">
+                        <input type="text" id="input-man-name" class="form-control" placeholder="男方姓名">
+                        <input type="text" id="input-woman-name" class="form-control" placeholder="女方姓名">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="required">双方身份证号</label>
+                    <input type="text" class="form-control" placeholder="男方身份证号" style="margin-bottom:10px;">
+                    <input type="text" class="form-control" placeholder="女方身份证号">
+                </div>
+
+                <div class="form-group">
+                    <label class="required">身份证照片(人像面)</label>
+                    <div class="upload-row">
+                        <div class="upload-box">
+                            <input type="file" class="upload-input">
+                            <div class="upload-icon">+</div>
+                            <span>男方证件</span>
+                        </div>
+                        <div class="upload-box">
+                            <input type="file" class="upload-input">
+                            <div class="upload-icon">+</div>
+                            <span>女方证件</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 婚姻凭证 -->
+            <div class="card">
+                <div class="section-title">婚姻兑付凭证</div>
+                <div class="form-group">
+                    <label class="required">结婚证字号</label>
+                    <input type="text" class="form-control" placeholder="例：J110101-202X-000XXX">
+                </div>
+                <div class="form-group">
+                    <label class="required">结婚证内页照片</label>
+                    <div class="upload-box" style="width:100%; height:110px;">
+                        <input type="file" class="upload-input">
+                        <div class="upload-icon">+</div>
+                        <span>点击上传双人合照页</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 权益选择 -->
+            <div class="card">
+                <div class="section-title">兑付权益选择 (三选一)</div>
+                <div class="reward-grid">
+                    <div class="reward-item active" onclick="selectType('money')">
+                        <span class="r-icon">💰</span>
+                        <span class="r-title">10001元</span>
+                        <span class="r-desc">现金打款</span>
+                    </div>
+                    <div class="reward-item" onclick="selectType('flower')">
+                        <span class="r-icon">🌹</span>
+                        <span class="r-title">10001朵</span>
+                        <span class="r-desc">进口玫瑰</span>
+                    </div>
+                    <div class="reward-item" onclick="selectType('ring')">
+                        <span class="r-icon">💍</span>
+                        <span class="r-title">1万元钻戒</span>
+                        <span class="r-desc">定制钻戒</span>
+                    </div>
+                </div>
+
+                <!-- 现金输入 -->
+                <div id="area-money" class="dynamic-area show">
+                    <div class="form-group">
+                        <label class="required">I类储蓄卡号</label>
+                        <input type="tel" class="form-control" placeholder="请输入收款银行卡号">
+                    </div>
+                    <div class="form-group">
+                        <label>开户行(选填)</label>
+                        <input type="text" class="form-control" placeholder="例: 招商银行">
+                    </div>
+                </div>
+
+                <!-- 实物输入 -->
+                <div id="area-address" class="dynamic-area">
+                    <div class="form-group">
+                        <label class="required">收货信息</label>
+                        <input type="text" class="form-control" placeholder="收货人姓名" style="margin-bottom:10px;">
+                        <input type="text" class="form-control" placeholder="详细配送地址">
+                    </div>
+                    <div class="form-group">
+                        <label>配送备注</label>
+                        <input type="text" class="form-control" placeholder="例如: 请提前电话联系">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top:15px;">
+                    <label class="required">联系电话</label>
+                    <input type="tel" class="form-control" placeholder="请输入手机号">
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="submitForm()">提交审核</button>
+            <div style="height:20px;"></div>
+        </div>
+
+        <!-- 成功页 -->
+        <div id="step-2">
+            <div class="success-bg">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="32" fill="#E6F7ED"/>
+                    <path d="M20 32L28 40L44 24" stroke="#28A745" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                
+                <h2 style="margin-top:15px; font-size:18px;">资料上传成功</h2>
+                
+                <!-- 这里的名字会自动变 -->
+                <div class="blessing-text" id="final-blessing">
+                    祝 新郎 & 新娘<br>新婚快乐！
+                </div>
+
+                <span class="status-badge">等待人工审核</span>
+
+                <div style="text-align:left; background:#f9f9f9; padding:15px; border-radius:8px;">
+                    <div class="detail-row">
+                        <span>所选权益</span>
+                        <span id="final-choice" style="color:#333; font-weight:bold;">现金 10001元</span>
+                    </div>
+                    <div class="detail-row" style="border:none; margin:0; padding:0;">
+                        <span>处理时效</span>
+                        <span>24小时内</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:20px; font-size:13px; color:#888; line-height:1.6;">
+                    您的申请已进入普凌恋爱合约加急通道。<br>
+                    审核通过后将立即执行兑付。<br>
+                    请保持电话畅通。
+                </div>
+            </div>
+            
+            <p style="margin-top:20px; color:#ccc; font-size:12px;">普凌恋爱合约 · 守护真爱</p>
+        </div>
+
+    </div>
+
+    <!-- Loading -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <div style="font-size:14px; color:#666;">正在加密传输资料...</div>
+    </div>
+
+    <script>
+        let currentChoice = 'money';
+
+        // 切换权益
+        function selectType(type) {
+            currentChoice = type;
+            // 样式切换
+            document.querySelectorAll('.reward-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // 输入框切换
+            const moneyArea = document.getElementById('area-money');
+            const addrArea = document.getElementById('area-address');
+
+            if(type === 'money') {
+                moneyArea.classList.add('show');
+                addrArea.classList.remove('show');
+            } else {
+                moneyArea.classList.remove('show');
+                addrArea.classList.add('show');
+            }
+        }
+
+        // 文件上传反馈
+        document.querySelectorAll('.upload-input').forEach(input => {
+            input.addEventListener('change', function() {
+                if(this.files[0]) {
+                    const box = this.parentElement;
+                    box.style.borderColor = "#d45d79";
+                    box.style.color = "#d45d79";
+                    box.querySelector('span').innerText = "已选择图片";
+                    box.querySelector('.upload-icon').innerText = "✔";
+                }
+            });
+        });
+
+        // 提交逻辑
+        function submitForm() {
+            // 1. 获取名字，制造惊喜
+            const manName = document.getElementById('input-man-name').value || '先生';
+            const womanName = document.getElementById('input-woman-name').value || '女士';
+
+            // 2. 显示加载
+            document.getElementById('loader').style.display = 'flex';
+
+            // 3. 准备结果页文案
+            let choiceText = "现金 10001元";
+            if(currentChoice === 'flower') choiceText = "进口玫瑰 10001朵";
+            if(currentChoice === 'ring') choiceText = "定制钻戒 (价值1万元)";
+
+            // 4. 模拟延迟跳转
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('step-1').style.display = 'none';
+                document.getElementById('step-2').style.display = 'block';
+
+                // 填入祝福语和选项
+                document.getElementById('final-blessing').innerHTML = ` ${manName} ❤ ${womanName}<br>你们经历了从青春到成熟的漫长<br>最终战胜时间，拥有了彼此<br>祝你们新婚快乐！`;
+                document.getElementById('final-choice').innerText = choiceText;
+
+                window.scrollTo(0,0);
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
